@@ -29,8 +29,14 @@
                 <div class="col-sm-10 backstage-col-sm-10">
                     <select class="form-control m-b backstage-select" name="status" id="status">
                         <option value="">-- 全部 --</option>
-                        <option value="1">初始化</option>
-                        <option value="12">已结束</option>
+                        <option value="0">初始化</option>
+                        <option value="1">提交成功</option>
+                        <option value="2">发送中</option>
+                        <option value="3">已停止</option>
+                        <option value="4">已取消</option>
+                        <option value="5">发送失败</option>
+                        <option value="6">发送成功</option>
+                        <option value="7">投递成功</option>
                     </select>
                 </div>
             </div>
@@ -41,8 +47,8 @@
                 <div class="col-sm-10 backstage-col-sm-10">
                     <select class="form-control m-b backstage-select" name="task_type" id="task_type">
                         <option value="">-- 全部 --</option>
-                        <option value="true">接收</option>
-                        <option value="false">发送</option>
+                        <option value="0">接收</option>
+                        <option value="1">发送</option>
                     </select>
                 </div>
             </div>
@@ -59,7 +65,7 @@
                 <label class="col-sm-2 control-label backstage-select-label">接收端传输服务IP:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
                     <input placeholder="请输入接收端传输服务IP" class="form-control backstage-input" type="target_ip" id="target_ip"
-                           name="mobile">
+                           name="target_ip">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -158,16 +164,15 @@
                 field: 'target_ip',
                 title: '接收端传输服务IP'
             }, {
-                field: 'op',
+                field: 'id',
                 title: '操作',
                 formatter: function (value, row, index) {
-                    return "<button type=\"button\" class=\"btn btn-danger backstage-button\" onclick=\"stop()\">暂停</button>"+
-                        "<button type=\"button\" class=\"btn btn-danger backstage-button\" onclick=\"stop()\">取消</button>"+
-                        "<button type=\"button\" class=\"btn btn-danger backstage-button\" onclick=\"stop()\">重试</button><br/>"+
-                        "<button type=\"button\" class=\"btn btn-danger backstage-button\" onclick=\"stop()\">删除</button>"+
-                        "<button type=\"button\" class=\"btn btn-danger backstage-button\" onclick=\"get_detail()\">任务详情</button>"+
-                        "<button type=\"button\" class=\"btn btn-danger backstage-button\" onclick=\"stop()\">文件信息</button>"
-
+                    return '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">暂停</button>'+
+                        '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">取消</button>'+
+                        '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">重试</button><br/>'+
+                        '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">删除</button>'+
+                        '<button type="button" class="btn btn-danger backstage-button" onclick="get_detail('+ value +')">任务详情</button>'+
+                        '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">文件信息</button>'
                         ;
                 }
             }]
@@ -184,22 +189,22 @@
         //applyDate
         var startTime = $("#startTime").val();
         if (startTime != "") {
-            startTime = startTime.replace(/[^0-9]/mg, '');
+            // startTime = startTime.replace(/[^0-9]/mg, '');
         }
         var endTime = $("#endTime").val();
         if (endTime != "") {
-            endTime = endTime.replace(/[^0-9]/mg, '');
-        }
+            // endTime = endTime.replace(/[^0-9]/mg, '');
+        };
         var obj = {
+            taskName:$("#task_name").val(),
+            creatTimeStart: startTime,
+            creatTimeEnd: endTime,
+            status: $("#status").val(),
+            taskType: $("#task_type").val(),
+            originIp: $("#origin_ip").val(),
+            targetIp: $("#target_ip").val(),
             pageSize: params.limit,
-            pageNo: params.offset / 10 + 1,
-            startTime: startTime,
-            endTime: endTime,
-            productCode: $("#productCode").val(),
-            esbMsgPushFlag: $("#ESBCode").val(),
-            uid: $("#uid").val(),
-            mobile: $("#mobile").val(),
-            applyNo: $("#loanId").val()
+            pageNo: params.offset / 10 + 1
         }
         return obj;
     }
@@ -280,11 +285,11 @@
         }
     }
 
-    function get_detail() {
+    function get_detail(id) {
         $.ajax({
             method: "post",
-            url: "/taskdetail",
-            data: {},
+            url: "/task_detail",
+            data: {id: id},
             success: function(data) {
                 $("#page-wrapper").empty();
                 $("#page-wrapper").html(data);

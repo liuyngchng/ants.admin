@@ -1,7 +1,368 @@
 package ants.admin.controller;
 
+import ants.admin.model.Data;
+import ants.admin.model.Pagination;
+import ants.admin.model.TaskSearchDto;
+import com.google.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 /**
- * Created by richard on 14/03/2019.
+ * config database https://www.cnblogs.com/liangblog/p/5228548.html
  */
+@Controller
+@RequestMapping("/")
 public class TaskController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskController.class);
+
+    @Value("${spring.datasource.url}")
+    private String dataSource;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+
+    @RequestMapping("")
+    public ModelAndView index() {
+        LOGGER.info("hello, index");
+        LOGGER.info("spring.datasource.url is {}", dataSource);
+        this.jdbcTemplate.execute("PRAGMA journal_mode=WAL");
+        LOGGER.info("open wal mode.");
+        ModelAndView modelAndView =  new ModelAndView("menu");
+        modelAndView.addObject("name", "whoAmI");
+        modelAndView.addObject("dae", new Date());
+        String sql = " create table if not exists file_info(" +
+            "id integer primary key," +
+            "app_id integer," +
+            "file_id integer," +
+            "name varchar(128)," +
+            "size integer," +
+            "path varchar(128)," +
+            "slice_size integer," +
+            "slice_total integer," +
+            "slice_snd integer," +
+            "md5 char(32)," +
+            "create_time timestamp not null default(strftime('%Y-%m-%d %H:%M:%f', 'now' ,'localtime'))," +
+            "update_time timestamp not null default(strftime('%Y-%m-%d %H:%M:%f', 'now' ,'localtime'))," +
+            "del integer default 0" +
+            ");";
+        LOGGER.debug(sql);
+        this.jdbcTemplate.execute(sql);
+        String sql1 = "create table if not exists task_info(" +
+            "id integer primary key," +
+            "task_name varchar(128)," +     //任务名称
+            "app_id integer," +             //应用类型
+            "data_size integer," +          //数据量
+            "uid varchar(128)," +
+            "origin_ip char(16)," +         //发送者IP
+            "target_ip varchar(128)," +     //接收者IP
+            "used_time integer," +          //任务用时
+            "complete_per char(5)," +       //完成率
+            "create_time timestamp not null default(strftime('%Y-%m-%d %H:%M:%f', 'now' ,'localtime'))," +
+            "finish_time timestamp," +
+            "push_time timestamp," +
+            "update_time timestamp," +
+            "interrupt_time integer," +     //中断次数
+            "retry_count integer," +        //重试次数
+            "retry_time integer," +         //重试总时间
+            "retry_ip char(16)," +          //重试机器IP
+            "slice_sended integer," +       //已发送的包书
+            "slice_total integer," +        //总包数
+            "restart_time timestamp," +
+            "cancel_time timestamp," +
+            "file_id varchar(128)," +
+            "priority integer," +
+            "progress integer," +
+            "op_uid varchar(128)," +
+            "op_type integer," +
+            "task_type integer," +          //任务类型
+            "status integer," +             //任务状态
+            "del integer default 0" +
+            ");";
+        LOGGER.debug(sql1);
+        this.jdbcTemplate.execute(sql1);
+//        String sql2 = "insert into task_info (task_name, status, task_type,origin_ip,"+
+//            "target_ip,data_size,complete_per,used_time,interrupt_time,retry_count,"+
+//            "retry_time,retry_ip,finish_time,push_time,slice_sended,slice_total)"+
+//            " values ('abc.pdf', 3, 2,'192.168.0.1','192.168.0.2',100, '100%',10,0,0,0,'',"+
+//            " '2020-11-11 08:00:39.000','2020-11-11 08:00:39.000',10,10)";
+//        LOGGER.debug(sql2);
+//        this.jdbcTemplate.execute(sql2);
+        return modelAndView;
+    }
+
+    @RequestMapping("task_list")
+    public ModelAndView taskList() {
+        LOGGER.info("hello, taskInfo");
+        ModelAndView modelAndView =  new ModelAndView("task_list");
+        modelAndView.addObject("name", "whoAmI");
+        modelAndView.addObject("dae", new Date());
+        return modelAndView;
+    }
+
+    @RequestMapping("task_detail")
+    public ModelAndView taskDetail(final int id) {
+        LOGGER.info("task detail , id = {}", id);
+        final TaskSearchDto dto = new TaskSearchDto();
+        dto.setId(id);
+        dto.setPageNo(1);
+        List<Map<String, Object>> data = this.getDataList(dto);
+        ModelAndView modelAndView =  new ModelAndView("task_detail");
+        modelAndView.addObject("task_name", data.get(0).get("task_name"));
+        modelAndView.addObject("create_time", data.get(0).get("create_time"));
+        modelAndView.addObject("finish_time", data.get(0).get("finish_time"));
+        modelAndView.addObject("file_info", data.get(0).get("file_info"));
+        modelAndView.addObject("used_time", data.get(0).get("used_time"));
+        modelAndView.addObject("complete_per", data.get(0).get("complete_per"));
+        modelAndView.addObject("status", data.get(0).get("status"));
+        modelAndView.addObject("task_type", data.get(0).get("task_type"));
+        modelAndView.addObject("origin_ip", data.get(0).get("origin_ip"));
+        modelAndView.addObject("target_ip", data.get(0).get("target_ip"));
+        modelAndView.addObject("create_time", data.get(0).get("create_time"));
+        return modelAndView;
+    }
+
+    @RequestMapping("file_list")
+    public ModelAndView fileList() {
+        LOGGER.info("hello, fileList");
+        ModelAndView modelAndView =  new ModelAndView("file_list");
+        modelAndView.addObject("name", "whoAmI");
+        modelAndView.addObject("dae", new Date());
+        return modelAndView;
+    }
+
+    @RequestMapping("curve_data")
+    public ModelAndView curveData() {
+        LOGGER.info("hello, curveData");
+        ModelAndView modelAndView =  new ModelAndView("curve_data");
+        modelAndView.addObject("name", "whoAmI");
+        modelAndView.addObject("dae", new Date());
+        return modelAndView;
+    }
+
+    @RequestMapping("data")
+    @ResponseBody
+    public Pagination getData(final TaskSearchDto searchDto) {
+        String countSql = TaskController.buildCountSql(searchDto);
+        int count = this.jdbcTemplate.queryForObject(countSql, Integer.class);
+        Pagination pagination = new Pagination(searchDto.getPageNo(),25,count);
+        if (count > 1000) {
+            LOGGER.error("search count > 1000, condition = {}", searchDto.toString());
+            return pagination;
+        }
+        pagination.setRows(
+            this.getDataList(searchDto)
+        );
+        return pagination;
+    }
+
+
+    @RequestMapping("view")
+    public ModelAndView view() {
+        LOGGER.info("hello, myview");
+        ModelAndView modelAndView =  new ModelAndView("view");
+        modelAndView.addObject("name", "whoAmI");
+        modelAndView.addObject("dae", new Date());
+        return modelAndView;
+    }
+
+    @RequestMapping("test")
+    public ModelAndView test() {
+        LOGGER.info("hello, test");
+        ModelAndView modelAndView =  new ModelAndView("test");
+        Data data = new Data();
+        data.setKey1("value1");
+        data.setKey2("value2");
+        data.setKey3("value3");
+        modelAndView.addObject("data", data);
+        return modelAndView;
+    }
+
+    @RequestMapping("file")
+    public ModelAndView file() {
+        LOGGER.info("hello, file");
+        ModelAndView modelAndView =  new ModelAndView("file");
+        return modelAndView;
+    }
+
+    @RequestMapping("login")
+    public ModelAndView login(HttpServletRequest request) {
+        if (null != request.getSession().getAttribute("user.name")) {
+            final String name = String.valueOf(request.getSession().getAttribute("user.name"));
+            if (Strings.isNullOrEmpty(name)) {
+                LOGGER.info("user name is null");
+                return new ModelAndView("login_index");
+            }
+            LOGGER.info("user login {}", name);
+            ModelAndView modelAndView =  new ModelAndView("index");
+            modelAndView.addObject("name", name);
+            SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            modelAndView.addObject("date", sf.format(new Date()));
+            return modelAndView;
+        }
+        final String name = request.getParameter("name");
+        final String password = request.getParameter("password");
+        LOGGER.info("user login {}", name);
+        request.getSession().setAttribute("user.name", name);
+        ModelAndView modelAndView =  new ModelAndView("index");
+        modelAndView.addObject("name", name);
+        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        modelAndView.addObject("date", sf.format(new Date()));
+        return modelAndView;
+    }
+
+    @RequestMapping("logout")
+    public ModelAndView logout(HttpServletRequest request) {
+        LOGGER.info("hello, file");
+        ModelAndView modelAndView =  new ModelAndView("login_index");
+        modelAndView.addObject("data", "您已退出系统，欢迎下次再来");
+        request.getSession().removeAttribute("user.name");
+        return modelAndView;
+    }
+
+    @RequestMapping("task")
+    public ModelAndView doTask(HttpServletRequest request) {
+        LOGGER.info("hello, task");
+        final String name = String.valueOf(request.getSession().getAttribute("user.name"));
+        ModelAndView modelAndView;
+        if (Strings.isNullOrEmpty(name) || name.equals("null")) {
+            LOGGER.info("user name is null");
+            return new ModelAndView("login_index");
+        }
+        if (name.equals("abc")) {
+            modelAndView = new ModelAndView("task");
+            if (request.getMethod().toLowerCase().equals("get")) {
+                LOGGER.info("http get method.");
+            } else {
+                request.getParameterMap().forEach((k, v) -> {
+                    if (k.startsWith("_s_")) {
+                        final String score = v[0];
+                        final String[] keys = k.replace("_s_", "").split("_");
+                        final String sql = buildUpdateSql(keys, score);
+                        LOGGER.info("update sql is {}", sql);
+                        int result = this.jdbcTemplate.update(sql);
+                        LOGGER.info("update result is {}", result);
+                    }
+                });
+            }
+            modelAndView.addObject("file", UploadController.fileList);
+        } else {
+            modelAndView = new ModelAndView("task_illegal");
+        }
+        return modelAndView;
+    }
+
+    /**
+     * 获取数据清单.
+     * @param searchDto
+     * @return
+     */
+    private List<Map<String, Object>> getDataList(TaskSearchDto searchDto) {
+        String sql = TaskController.buildSearchSql(searchDto);
+        LOGGER.debug("search sql = {}", sql);
+        List<Map<String,Object>> result = this.jdbcTemplate.query(sql, new RowMapper<Map<String,Object>>() {
+            @Override
+            public Map mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Map row = new HashMap();
+                row.put("id", rs.getInt("id"));
+                row.put("task_name", rs.getString("task_name"));
+                row.put("create_time", rs.getString("create_time"));
+                row.put("finish_time", rs.getString("finish_time"));
+                row.put("data_size", rs.getString("data_size"));
+                row.put("complete_per", rs.getString("complete_per"));
+                row.put("status", rs.getString("status"));
+//                row.put("task_type", rs.getString("task_type"));
+                row.put("origin_ip", rs.getString("origin_ip"));
+                row.put("target_ip", rs.getString("target_ip"));
+                return row;
+            }
+        });
+        return result;
+    }
+
+
+    private static String buildCountSql(TaskSearchDto dto) {
+        StringBuilder sb = new StringBuilder("select count(1) from task_info where 1=1 ");
+        sb.append(TaskController.buildSearchCondition(dto));
+        return sb.toString();
+    }
+
+    private static String buildSearchSql(TaskSearchDto dto) {
+        StringBuilder sb = new StringBuilder("select * from task_info where 1=1 ");
+        sb.append(TaskController.buildSearchCondition(dto));
+        sb.append(" order by create_time desc ");
+        sb.append("limit ");
+        sb.append(dto.getPageNo() -1);
+        sb.append(", 25");
+        return sb.toString();
+    }
+
+    private static StringBuilder buildSearchCondition(TaskSearchDto dto) {
+        StringBuilder sb = new StringBuilder();
+        if (!Strings.isNullOrEmpty(dto.getTaskName())) {
+            sb.append(" and task_name = '");
+            sb.append(dto.getTaskName());
+            sb.append("'");
+        }
+        if (!Strings.isNullOrEmpty(dto.getCreateTimeStart())) {
+            sb.append("and create_time >= '");
+            sb.append(dto.getCreateTimeStart());
+            sb.append("'");
+        }
+        if (!Strings.isNullOrEmpty(dto.getCreateTimeEnd())) {
+            sb.append("and create_time <= '");
+            sb.append(dto.getCreateTimeEnd());
+            sb.append("'");
+        }
+        if (!Strings.isNullOrEmpty(dto.getTaskType())) {
+            int a = Integer.parseInt(dto.getTaskType());
+            sb.append("and task_type = ");
+            sb.append(dto.getTaskType());
+        }
+        if (!Strings.isNullOrEmpty(dto.getStatus())) {
+            int a = Integer.parseInt(dto.getStatus());
+            sb.append("and status = ");
+            sb.append(dto.getStatus());
+        }
+        if (!Strings.isNullOrEmpty(dto.getOriginIp())) {
+            sb.append("and origin_ip = '");
+            sb.append(dto.getOriginIp());
+            sb.append("'");
+        }
+        if (!Strings.isNullOrEmpty(dto.getTargetIp())) {
+            sb.append("and target_ip = '");
+            sb.append(dto.getTargetIp());
+            sb.append("'");
+        }
+        return sb;
+    }
+
+    private String buildUpdateSql(String[] keys, String score) {
+        if (keys.length != 4) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder("update test.test set score = '");
+        sb.append(score);
+        sb.append("' where true ");
+        sb.append("and city = '" + keys[0] + "'");
+        sb.append("and item = '" + keys[1] + "'");
+        sb.append("and id1 = '" + keys[2] + "'");
+        sb.append("and id2 = '" + keys[3] + "'");
+        return sb.toString();
+    }
 }

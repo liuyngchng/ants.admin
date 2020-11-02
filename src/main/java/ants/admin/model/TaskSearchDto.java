@@ -5,78 +5,113 @@ package ants.admin.model;
  */
 public class TaskSearchDto {
 
+    /**
+     * 数据库主键
+     */
+    private int id;
 
+    /**
+     * 任务名称
+     */
+    private String taskName;
 
-    private String fileName;
+    /**
+     * 任务开始时间
+     */
+    private String createTimeStart;
 
-    private String startTime;
+    /**
+     * 完成时间
+     */
+    private String createTimeEnd;
 
-    private String endTime;
+    /**
+     * 任务状态
+     */
+    private String status;
 
-    private String state;
+    /**
+     * 任务类型
+     */
+    private String taskType;
 
-    private String type;
+    /**
+     * 发送者IP
+     */
+    private String originIp;
 
-    private String senderIp;
+    /**
+     * 接收者Ip
+     */
+    private String targetIp;
 
-    private String receiverIp;
+    public int getId() {
+        return id;
+    }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    /**
+     * 页码，从1开始
+     */
     private int pageNo;         //start from 1;
 
-    public String getFileName() {
-        return fileName;
+    public String getTaskName() {
+        return taskName;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
     }
 
-    public String getStartTime() {
-        return startTime;
+    public String getCreateTimeStart() {
+        return createTimeStart;
     }
 
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
+    public void setCreateTimeStart(String createTimeStart) {
+        this.createTimeStart = createTimeStart;
     }
 
-    public String getEndTime() {
-        return endTime;
+    public String getCreateTimeEnd() {
+        return createTimeEnd;
     }
 
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
+    public void setCreateTimeEnd(String createTimeEnd) {
+        this.createTimeEnd = createTimeEnd;
     }
 
-    public String getState() {
-        return state;
+    public String getStatus() {
+        return status;
     }
 
-    public void setState(String state) {
-        this.state = state;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public String getType() {
-        return type;
+    public String getTaskType() {
+        return taskType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setTaskType(String taskType) {
+        this.taskType = taskType;
     }
 
-    public String getSenderIp() {
-        return senderIp;
+    public String getOriginIp() {
+        return originIp;
     }
 
-    public void setSenderIp(String senderIp) {
-        this.senderIp = senderIp;
+    public void setOriginIp(String originIp) {
+        this.originIp = originIp;
     }
 
-    public String getReceiverIp() {
-        return receiverIp;
+    public String getTargetIp() {
+        return targetIp;
     }
 
-    public void setReceiverIp(String receiverIp) {
-        this.receiverIp = receiverIp;
+    public void setTargetIp(String targetIp) {
+        this.targetIp = targetIp;
     }
 
     public int getPageNo() {

@@ -25,11 +25,11 @@
 	<Loggers>
 		<Root level="INFO" additivity="false">
 			<AppenderRef ref="console"/>
-			<AppenderRef ref="rollingFile"/>
+<!--			<AppenderRef ref="rollingFile"/>-->
 		</Root>
-		<!--<Logger name="hello.controller" level="ERROR" additivity="false">-->
-			<!--&lt;!&ndash;<AppenderRef ref="console"/>&ndash;&gt;-->
-			<!--<AppenderRef ref="rollingFile"/>-->
-		<!--</Logger>-->
+		<Logger name="ants.admin" level="DEBUG" additivity="false">
+			<AppenderRef ref="console"/>
+<!--			<AppenderRef ref="rollingFile"/>-->
+		</Logger>
 	</Loggers>
 </Configuration>

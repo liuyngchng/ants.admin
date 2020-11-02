@@ -8,7 +8,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">文件名称:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="aaa.pdf">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="${task_name!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -16,7 +16,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">开始时间:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="2020年3月3日 13:28 59">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="${create_time!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -24,7 +24,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">结束时间:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="2020年3月3日 13:31 09">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="${finish_time!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -32,7 +32,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">文件信息:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="（1）aaa.pdf， 10MB；（2）b.docx，5MB">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="${file_info!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -40,7 +40,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">任务用时:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="2分10秒">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="${used_time!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -48,7 +48,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">任务完成率:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="20%">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="${complete_per]!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -56,7 +56,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">任务状态:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="中断">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="${status!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -64,7 +64,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">任务类型:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="接收">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="${task_type!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
