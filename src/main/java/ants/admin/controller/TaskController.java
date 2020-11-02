@@ -1,6 +1,7 @@
 package ants.admin.controller;
 
-import ants.admin.model.Data;
+import ants.admin.enums.TaskType;
+import ants.admin.model.TaskInfo;
 import ants.admin.model.Pagination;
 import ants.admin.model.TaskSearchDto;
 import com.google.common.base.Strings;
@@ -36,10 +37,8 @@ public class TaskController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-
     @RequestMapping("")
     public ModelAndView index() {
-        LOGGER.info("hello, index");
         LOGGER.info("spring.datasource.url is {}", dataSource);
         this.jdbcTemplate.execute("PRAGMA journal_mode=WAL");
         LOGGER.info("open wal mode.");
@@ -65,13 +64,13 @@ public class TaskController {
         this.jdbcTemplate.execute(sql);
         String sql1 = "create table if not exists task_info(" +
             "id integer primary key," +
-            "task_name varchar(128)," +     //任务名称
-            "app_id integer," +             //应用类型
-            "data_size integer," +          //数据量
+            "task_name varchar(128)," +
+            "app_id integer," +
+            "data_size integer," +
             "uid varchar(128)," +
-            "origin_ip char(16)," +         //发送者IP
-            "target_ip varchar(128)," +     //接收者IP
-            "used_time integer," +          //任务用时
+            "origin_ip char(16)," +
+            "target_ip varchar(128)," +
+            "used_time integer," +
             "complete_per char(5)," +       //完成率
             "create_time timestamp not null default(strftime('%Y-%m-%d %H:%M:%f', 'now' ,'localtime'))," +
             "finish_time timestamp," +
@@ -107,11 +106,20 @@ public class TaskController {
     }
 
     @RequestMapping("task_list")
-    public ModelAndView taskList() {
-        LOGGER.info("hello, taskInfo");
+    public ModelAndView taskList(HttpServletRequest request) {
+        LOGGER.info("task_list, search = {}", request.getSession().getAttribute("s"));
         ModelAndView modelAndView =  new ModelAndView("task_list");
-        modelAndView.addObject("name", "whoAmI");
-        modelAndView.addObject("dae", new Date());
+        if (null != request.getSession().getAttribute("s")) {
+            final TaskSearchDto s = (TaskSearchDto) request.getSession().getAttribute("s");
+            LOGGER.debug("searchDto in session is {}", s);
+            modelAndView.addObject("task_name", s.getTaskName());
+            modelAndView.addObject("create_time_start", s.getCreateTimeStart());
+            modelAndView.addObject("create_time_end", s.getCreateTimeEnd());
+            modelAndView.addObject("status", s.getStatus());
+            modelAndView.addObject("task_type", s.getTaskType());
+            modelAndView.addObject("origin_ip", s.getOriginIp());
+            modelAndView.addObject("target_ip", s.getTargetIp());
+        }
         return modelAndView;
     }
 
@@ -123,6 +131,10 @@ public class TaskController {
         dto.setPageNo(1);
         List<Map<String, Object>> data = this.getDataList(dto);
         ModelAndView modelAndView =  new ModelAndView("task_detail");
+        if (null == data || data.isEmpty()) {
+            LOGGER.error("error for task_detail, id = {}", id);
+            return modelAndView;
+        }
         modelAndView.addObject("task_name", data.get(0).get("task_name"));
         modelAndView.addObject("create_time", data.get(0).get("create_time"));
         modelAndView.addObject("finish_time", data.get(0).get("finish_time"));
@@ -130,7 +142,14 @@ public class TaskController {
         modelAndView.addObject("used_time", data.get(0).get("used_time"));
         modelAndView.addObject("complete_per", data.get(0).get("complete_per"));
         modelAndView.addObject("status", data.get(0).get("status"));
-        modelAndView.addObject("task_type", data.get(0).get("task_type"));
+        if (null != data.get(0).get("task_type")) {
+            if(String.valueOf(data.get(0).get("task_type")).equals("0")) {
+                modelAndView.addObject("task_type", "发送");
+            } else {
+                modelAndView.addObject("task_type", "接收");
+            }
+        }
+
         modelAndView.addObject("origin_ip", data.get(0).get("origin_ip"));
         modelAndView.addObject("target_ip", data.get(0).get("target_ip"));
         modelAndView.addObject("create_time", data.get(0).get("create_time"));
@@ -157,8 +176,22 @@ public class TaskController {
 
     @RequestMapping("data")
     @ResponseBody
-    public Pagination getData(final TaskSearchDto searchDto) {
-        String countSql = TaskController.buildCountSql(searchDto);
+    public Pagination getData(final TaskSearchDto searchDto, final HttpServletRequest request) {
+        LOGGER.debug("searchDto = {}", searchDto);
+        TaskSearchDto mySearch = null;
+        if (TaskController.isValidSearch(searchDto)) {
+            LOGGER.debug("valid searchDto");
+            request.getSession().setAttribute("s", searchDto);
+            mySearch = searchDto;
+        } else {
+            LOGGER.debug("invalid searchDto");
+            if (null == request.getSession().getAttribute("s")) {
+                mySearch = searchDto;
+            } else {
+                mySearch = (TaskSearchDto)request.getSession().getAttribute("s");
+            }
+        }
+        String countSql = TaskController.buildCountSql(mySearch);
         int count = this.jdbcTemplate.queryForObject(countSql, Integer.class);
         Pagination pagination = new Pagination(searchDto.getPageNo(),25,count);
         if (count > 1000) {
@@ -171,32 +204,12 @@ public class TaskController {
         return pagination;
     }
 
-
     @RequestMapping("view")
     public ModelAndView view() {
         LOGGER.info("hello, myview");
         ModelAndView modelAndView =  new ModelAndView("view");
         modelAndView.addObject("name", "whoAmI");
         modelAndView.addObject("dae", new Date());
-        return modelAndView;
-    }
-
-    @RequestMapping("test")
-    public ModelAndView test() {
-        LOGGER.info("hello, test");
-        ModelAndView modelAndView =  new ModelAndView("test");
-        Data data = new Data();
-        data.setKey1("value1");
-        data.setKey2("value2");
-        data.setKey3("value3");
-        modelAndView.addObject("data", data);
-        return modelAndView;
-    }
-
-    @RequestMapping("file")
-    public ModelAndView file() {
-        LOGGER.info("hello, file");
-        ModelAndView modelAndView =  new ModelAndView("file");
         return modelAndView;
     }
 
@@ -253,7 +266,7 @@ public class TaskController {
                     if (k.startsWith("_s_")) {
                         final String score = v[0];
                         final String[] keys = k.replace("_s_", "").split("_");
-                        final String sql = buildUpdateSql(keys, score);
+                        final String sql = TaskController.buildUpdateSql(keys, score);
                         LOGGER.info("update sql is {}", sql);
                         int result = this.jdbcTemplate.update(sql);
                         LOGGER.info("update result is {}", result);
@@ -317,42 +330,44 @@ public class TaskController {
         if (!Strings.isNullOrEmpty(dto.getTaskName())) {
             sb.append(" and task_name = '");
             sb.append(dto.getTaskName());
-            sb.append("'");
+            sb.append("' ");
         }
         if (!Strings.isNullOrEmpty(dto.getCreateTimeStart())) {
             sb.append("and create_time >= '");
             sb.append(dto.getCreateTimeStart());
-            sb.append("'");
+            sb.append("' ");
         }
         if (!Strings.isNullOrEmpty(dto.getCreateTimeEnd())) {
             sb.append("and create_time <= '");
             sb.append(dto.getCreateTimeEnd());
-            sb.append("'");
+            sb.append("' ");
         }
-        if (!Strings.isNullOrEmpty(dto.getTaskType())) {
-            int a = Integer.parseInt(dto.getTaskType());
-            sb.append("and task_type = ");
-            sb.append(dto.getTaskType());
-        }
+//        if (!Strings.isNullOrEmpty(dto.getTaskType())) {
+//            int a = Integer.parseInt(dto.getTaskType());
+//            sb.append("and task_type = ");
+//            sb.append(dto.getTaskType());
+//            sb.append(" ");
+//        }
         if (!Strings.isNullOrEmpty(dto.getStatus())) {
             int a = Integer.parseInt(dto.getStatus());
             sb.append("and status = ");
             sb.append(dto.getStatus());
+            sb.append(" ");
         }
         if (!Strings.isNullOrEmpty(dto.getOriginIp())) {
             sb.append("and origin_ip = '");
             sb.append(dto.getOriginIp());
-            sb.append("'");
+            sb.append("' ");
         }
         if (!Strings.isNullOrEmpty(dto.getTargetIp())) {
             sb.append("and target_ip = '");
             sb.append(dto.getTargetIp());
-            sb.append("'");
+            sb.append("' ");
         }
         return sb;
     }
 
-    private String buildUpdateSql(String[] keys, String score) {
+    private static String buildUpdateSql(String[] keys, String score) {
         if (keys.length != 4) {
             return "";
         }
@@ -364,5 +379,15 @@ public class TaskController {
         sb.append("and id1 = '" + keys[2] + "'");
         sb.append("and id2 = '" + keys[3] + "'");
         return sb.toString();
+    }
+
+    private static boolean isValidSearch(TaskSearchDto dto) {
+        return !Strings.isNullOrEmpty(dto.getTaskName())
+                || !Strings.isNullOrEmpty(dto.getCreateTimeStart())
+                || !Strings.isNullOrEmpty(dto.getCreateTimeEnd())
+                || !Strings.isNullOrEmpty(dto.getStatus())
+                || !Strings.isNullOrEmpty(dto.getTaskType())
+                || !Strings.isNullOrEmpty(dto.getOriginIp())
+                || !Strings.isNullOrEmpty(dto.getTargetIp());
     }
 }

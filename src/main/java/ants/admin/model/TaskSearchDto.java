@@ -1,9 +1,14 @@
 package ants.admin.model;
 
+import com.alibaba.dubbo.common.json.JSON;
+
+import java.io.IOException;
+import java.io.Serializable;
+
 /**
  * Created by richard on 3/20/19.
  */
-public class TaskSearchDto {
+public class TaskSearchDto implements Serializable {
 
     /**
      * 数据库主键
@@ -120,5 +125,15 @@ public class TaskSearchDto {
 
     public void setPageNo(int pageNo) {
         this.pageNo = pageNo;
+    }
+
+    @Override
+    public String toString() {
+
+        try {
+            return JSON.json(this);
+        } catch (IOException e) {
+            return "";
+        }
     }
 }

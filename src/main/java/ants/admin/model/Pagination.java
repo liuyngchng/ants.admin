@@ -5,6 +5,9 @@
 package ants.admin.model;
 
 
+import com.alibaba.dubbo.common.json.JSON;
+
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
@@ -81,9 +84,15 @@ public class Pagination<T> implements Serializable {
         this.setPageSize(pageSize);
         this.setTotal(total);
     }
+
     @Override
     public String toString() {
-        return this.toString();
+
+        try {
+            return JSON.json(this);
+        } catch (IOException e) {
+            return "";
+        }
     }
 
 }

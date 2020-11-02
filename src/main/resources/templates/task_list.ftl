@@ -8,7 +8,8 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">文件名称:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input placeholder="请输入文件名称" class="form-control backstage-input" type="text" id="task_name" name="task_name">
+                    <input placeholder="请输入文件名称" class="form-control backstage-input"
+                           type="text" id="task_name" name="task_name" value="${task_name!}">
                 </div>
             </div>
 
@@ -17,9 +18,9 @@
                 <label class="col-sm-2 control-label backstage-select-label">时间:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
                     <input id="startTime" class="laydate-icon form-control layer-date backstage-date"
-                           readonly="readonly" placeholder="开始时间" name="create_time">
+                           readonly="readonly" placeholder="开始时间" name="startTime" value="${create_time_start!}" />
                     <input id="endTime" class="laydate-icon form-control layer-date backstage-date" readonly="readonly"
-                           placeholder="结束时间" name="finish_time">
+                           placeholder="结束时间" name="endTime" value="${create_time_end!}"/>
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -37,6 +38,7 @@
                         <option value="5">发送失败</option>
                         <option value="6">发送成功</option>
                         <option value="7">投递成功</option>
+                        <option value="8">已删除</option>
                     </select>
                 </div>
             </div>
@@ -57,7 +59,8 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">发送端IP:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input placeholder="请输入发送端IP" class="form-control backstage-input" type="text" id="origin_ip" name="origin_ip">
+                    <input placeholder="请输入发送端IP" class="form-control backstage-input"
+                           type="text" id="origin_ip" name="origin_ip" value="${origin_ip!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -65,7 +68,7 @@
                 <label class="col-sm-2 control-label backstage-select-label">接收端传输服务IP:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
                     <input placeholder="请输入接收端传输服务IP" class="form-control backstage-input" type="target_ip" id="target_ip"
-                           name="target_ip">
+                           name="target_ip" value="${target_ip!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -113,8 +116,12 @@
             startTime.max = datas;
         }
     };
-    laydate(startTime);
-    laydate(endTime);
+    this.laydate(startTime);
+    this.laydate(endTime);
+    this.setStatus(${status!});
+    this.setTaskType(${task_type!});
+    <#--this.setTimeStart( ${create_time_start!});-->
+    <#--this.setTimeEnd(${create_time_end!});-->
 
     //table
     $('#table').bootstrapTable({
@@ -197,8 +204,8 @@
         };
         var obj = {
             taskName:$("#task_name").val(),
-            creatTimeStart: startTime,
-            creatTimeEnd: endTime,
+            createTimeStart: $("#startTime").val(),
+            createTimeEnd: $("#endTime").val(),
             status: $("#status").val(),
             taskType: $("#task_type").val(),
             originIp: $("#origin_ip").val(),
@@ -268,22 +275,35 @@
         $(obj).hide();
     }
 
-    function hideJson(obj) {
-        $(obj).parent().parent().prev().find(".showJson").show();
-        $(obj).parent().parent().eq(0).remove();
+    function setStatus(value) {
+        if (value == null && value == "") {
+            return;
+        }
+        $("#status").val(value);
     }
 
-    function getCfcaDesc(value) {
-        if (value == 0) {
-            return '未签';
-        } else if (value == 1) {
-            return '已签, 已生成PDF';
-        } else if (value == 2) {
-            return '已签，未生成PDF';
-        } else {
-            return value;
+    function setTaskType(value) {
+        if (value == null && value == "") {
+            return;
         }
+        $("#task_type").val(value);
     }
+
+    function setTimeStart(value) {
+        if (value == null && value == "") {
+            return;
+        }
+        $("#create_time_start").val(value);
+    }
+
+    function setTimeEnd(value) {
+        if (value == null && value == "") {
+            return;
+        }
+        $("#create_time_end").val(value);
+    }
+
+
 
     function get_detail(id) {
         $.ajax({

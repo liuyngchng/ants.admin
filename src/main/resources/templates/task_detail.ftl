@@ -48,7 +48,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">任务完成率:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="${complete_per]!}">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="${complete_per!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
