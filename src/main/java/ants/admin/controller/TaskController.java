@@ -1,5 +1,6 @@
 package ants.admin.controller;
 
+import ants.admin.enums.TaskStatus;
 import ants.admin.enums.TaskType;
 import ants.admin.model.TaskInfo;
 import ants.admin.model.Pagination;
@@ -149,19 +150,20 @@ public class TaskController {
                 modelAndView.addObject("task_type", "接收");
             }
         }
-
         modelAndView.addObject("origin_ip", data.get(0).get("origin_ip"));
         modelAndView.addObject("target_ip", data.get(0).get("target_ip"));
         modelAndView.addObject("create_time", data.get(0).get("create_time"));
         return modelAndView;
     }
 
+    /**
+     * 返回file_list的静态页面
+     * @return
+     */
     @RequestMapping("file_list")
     public ModelAndView fileList() {
         LOGGER.info("hello, fileList");
         ModelAndView modelAndView =  new ModelAndView("file_list");
-        modelAndView.addObject("name", "whoAmI");
-        modelAndView.addObject("dae", new Date());
         return modelAndView;
     }
 
@@ -209,6 +211,23 @@ public class TaskController {
     public void resetSearch(final HttpServletRequest request) {
         LOGGER.debug("reset search");
         request.getSession().removeAttribute("s");
+    }
+
+    @RequestMapping("delete_task")
+    @ResponseBody
+    public int deleteTask(int id) {
+        LOGGER.debug("deleteTask, id = {}", id);
+        StringBuilder sb = new StringBuilder("update task_info set del = 1 where id = '");
+        sb.append(id);
+        sb.append("'");
+        try {
+            LOGGER.info("deleteTask, sql = {}",sb.toString());
+            this.jdbcTemplate.execute(sb.toString());
+        } catch (Exception ex) {
+            LOGGER.error(ex.toString());
+            return 1;
+        }
+        return 0;
     }
 
     @RequestMapping("view")
@@ -303,7 +322,21 @@ public class TaskController {
                 row.put("task_name", rs.getString("task_name"));
                 row.put("create_time", rs.getString("create_time"));
                 row.put("finish_time", rs.getString("finish_time"));
-                row.put("data_size", rs.getString("data_size"));
+                int data_size = Integer.parseInt(rs.getString("data_size"));
+                if (data_size > 0  && data_size < 1024 * 1024) {
+                    data_size = data_size / 1024;
+                    row.put("data_size", data_size + "KB");
+                } else if (data_size >= 1024 *1024 && data_size < 1024 * 1024 * 1024) {
+                    data_size = data_size / (1024 * 1024);
+                    row.put("data_size", data_size + "MB");
+                } else if (data_size >= 1024 *1024 *1024 && data_size < 1024 * 1024 * 1024 * 1024) {
+                    data_size = data_size / (1024 * 1024 * 1024);
+                    row.put("data_size", data_size + "GB");
+                } else {
+                    row.put("data_size", data_size + "字节");
+                }
+                final String taskName = rs.getString("task_name");
+                row.put("file_type", taskName.substring(taskName.lastIndexOf(".")+1));
                 row.put("complete_per", rs.getString("complete_per"));
                 row.put("status", rs.getString("status"));
 //                row.put("task_type", rs.getString("task_type"));
@@ -333,7 +366,19 @@ public class TaskController {
     }
 
     private static StringBuilder buildSearchCondition(TaskSearchDto dto) {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
+        if (Strings.isNullOrEmpty(dto.getStatus())) {
+            sb.append("and del = 0 ");
+        } else {
+            final int a = Integer.parseInt(dto.getStatus());
+            if (TaskStatus.DELETED.getStatus() == a) {
+                sb.append("and del = 1");
+            } else {
+                sb.append("and status = ");
+                sb.append(dto.getStatus());
+            }
+            sb.append(" ");
+        }
         if (!Strings.isNullOrEmpty(dto.getTaskName())) {
             sb.append(" and task_name = '");
             sb.append(dto.getTaskName());
@@ -355,12 +400,7 @@ public class TaskController {
 //            sb.append(dto.getTaskType());
 //            sb.append(" ");
 //        }
-        if (!Strings.isNullOrEmpty(dto.getStatus())) {
-            int a = Integer.parseInt(dto.getStatus());
-            sb.append("and status = ");
-            sb.append(dto.getStatus());
-            sb.append(" ");
-        }
+
         if (!Strings.isNullOrEmpty(dto.getOriginIp())) {
             sb.append("and origin_ip = '");
             sb.append(dto.getOriginIp());

@@ -1,5 +1,8 @@
 
-<div><label class="col-sm-2 control-label backstage-select-label">任务详情</label></div>
+<div><label class="col-sm-2 control-label backstage-select-label">
+        首页->
+        <a href="javascript:getPage('/task_list')">任务查询</a>->任务详请
+    </label></div>
 <div class="ibox float-e-margins backstage-right-div">
     <input id="contextParam" type="hidden" value="/"/>
     <div class="ibox-content">

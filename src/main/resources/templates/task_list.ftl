@@ -1,5 +1,5 @@
 
-<div><label class="col-sm-2 control-label backstage-select-label">任务信息</label></div>
+<div><label class="col-sm-2 control-label backstage-select-label">首页->任务查询</label></div>
 <div class="ibox float-e-margins backstage-right-div">
     <input id="contextParam" type="hidden" value="/"/>
     <div class="ibox-content">
@@ -137,7 +137,7 @@
         striped: true,
         pagination: true,
         sidePagination: 'server',
-        pageSize: 10,
+        pageSize: 25,
         pageNumber: 1,
         pageList: [],
         queryParams: queryParams,
@@ -157,7 +157,7 @@
                 title: '结束时间'
             }, {
                 field: 'data_size',
-                title: '数据量(MB)'
+                title: '数据量'
             }, {
                 field: 'complete_per',
                 title: '任务完成率（%）'
@@ -180,14 +180,13 @@
                     return '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">暂停</button>'+
                         '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">取消</button>'+
                         '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">重试</button><br/>'+
-                        '<button type="button" class="btn btn-danger backstage-button" onclick="delete()">删除</button>'+
-                        '<button type="button" class="btn btn-danger backstage-button" onclick="get_detail('+ value +')">任务详情</button>'+
-                        '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">文件信息</button>'
+                        '<button type="button" class="btn btn-danger backstage-button" onclick="delete_task('+ value +')">删除</button>'+
+                        '<button type="button" class="btn btn-danger backstage-button" onclick="get_task_detail('+ value +')">任务详情</button>'+
+                        '<button type="button" class="btn btn-danger backstage-button" onclick="get_file_list('+ value +')">文件信息</button>'
                         ;
                 }
             }]
     })
-
     //设置查询参数
     function queryParams(params) {
         if ($("#ifPageOne").val() == 1) {
@@ -324,12 +323,39 @@
         $("#create_time_end").val(value);
     }
 
+    function delete_task(id) {
+        $.ajax({
+            method: "post",
+            url: "/delete_task",
+            data: {id: id},
+            success: function(data) {
+                if ('0' == data) {
+                    alert('删除成功');
+                } else {
+                    alert('删除失败');
+                }
+                search();
+            }
+        })
+    }
 
-
-    function get_detail(id) {
+    function get_task_detail(id) {
         $.ajax({
             method: "post",
             url: "/task_detail",
+            data: {id: id},
+            success: function(data) {
+                $("#page-wrapper").empty();
+                $("#page-wrapper").html(data);
+                drawCurve();
+            }
+        })
+    }
+
+    function get_file_list(id) {
+        $.ajax({
+            method: "post",
+            url: "/file_list",
             data: {id: id},
             success: function(data) {
                 $("#page-wrapper").empty();

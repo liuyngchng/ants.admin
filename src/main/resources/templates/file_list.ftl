@@ -1,5 +1,8 @@
 
-<div><label class="col-sm-2 control-label backstage-select-label">文件信息</label></div>
+<div><label class="col-sm-2 control-label backstage-select-label">
+        首页->
+        <a href="javascript:getPage('/task_list')">任务查询</a>->文件信息
+    </label></div>
 <div class="ibox float-e-margins backstage-right-div">
     <input id="contextParam" type="hidden" value="/"/>
     <div class="ibox-content" >
@@ -39,7 +42,7 @@
         striped: true,
         pagination: true,
         sidePagination: 'server',
-        pageSize: 10,
+        pageSize: 25,
         pageNumber: 1,
         pageList: [],
         queryParams: queryParams,
@@ -80,10 +83,10 @@
                 title: '文件类型'
             },{
                 field: 'size',
-                title: '文件大小(MB)'
+                title: '文件大小'
             }, {
                 field: 'data_size',
-                title: '实际发送数据量(MB)'
+                title: '实际发送数据量'
             }, {
                 field: 'app_type',
                 title: '应用类型'
