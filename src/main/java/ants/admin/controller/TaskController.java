@@ -204,6 +204,13 @@ public class TaskController {
         return pagination;
     }
 
+    @RequestMapping("reset_search")
+    @ResponseBody
+    public void resetSearch(final HttpServletRequest request) {
+        LOGGER.debug("reset search");
+        request.getSession().removeAttribute("s");
+    }
+
     @RequestMapping("view")
     public ModelAndView view() {
         LOGGER.info("hello, myview");

@@ -77,6 +77,9 @@
                 <div class="col-sm-2 backstage-select-label">
                     <button type="button" class="btn btn-danger backstage-button" onclick="search()">查&nbsp;&nbsp;&nbsp;询</button>
                 </div>
+                <div class="col-sm-2 backstage-select-label">
+                    <button type="button" class="btn btn-danger backstage-button" onclick="resetSearch()">重置查询条件</button>
+                </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
         </form>
@@ -177,7 +180,7 @@
                     return '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">暂停</button>'+
                         '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">取消</button>'+
                         '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">重试</button><br/>'+
-                        '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">删除</button>'+
+                        '<button type="button" class="btn btn-danger backstage-button" onclick="delete()">删除</button>'+
                         '<button type="button" class="btn btn-danger backstage-button" onclick="get_detail('+ value +')">任务详情</button>'+
                         '<button type="button" class="btn btn-danger backstage-button" onclick="stop()">文件信息</button>'
                         ;
@@ -222,6 +225,24 @@
         $('#table').bootstrapTable('removeAll');
         $('#table').bootstrapTable('refresh');
     }
+
+    function resetSearch() {
+        $("#task_name").val("");
+        $("#startTime").val("");
+        $("#status").val("");
+        $("#task_type").val("");
+        $("#origin_ip").val("");
+        $("#target_ip").val("");
+        $.ajax({
+            method: "post",
+            url: "/reset_search",
+            data: {"id": ""},
+            success: function(data) {
+
+            }
+        })
+    }
+
 
     //表格时间格式化
     function tableDateFormatter(dateStr) {
@@ -317,4 +338,5 @@
             }
         })
     }
+
 </script>
