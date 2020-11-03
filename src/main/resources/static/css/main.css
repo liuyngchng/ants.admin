@@ -5,6 +5,12 @@
     text-align: left !important;
 }
 
+.admin-select-label {
+    margin-left: 10px;
+    width: 400px;
+    text-align: left !important;
+}
+
 /*select框体*/
 .backstage-select {
     width: 240px;

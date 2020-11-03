@@ -139,6 +139,7 @@ public class TaskController {
             LOGGER.error("error for task_detail, id = {}", id);
             return modelAndView;
         }
+        modelAndView.addObject("id", data.get(0).get("id"));
         modelAndView.addObject("task_name", data.get(0).get("task_name"));
         modelAndView.addObject("create_time", data.get(0).get("create_time"));
         modelAndView.addObject("finish_time", data.get(0).get("finish_time"));
@@ -167,6 +168,18 @@ public class TaskController {
     public ModelAndView fileList() {
         LOGGER.info("hello, fileList");
         ModelAndView modelAndView =  new ModelAndView("file_list");
+        return modelAndView;
+    }
+
+    /**
+     * 返回file_list的静态页面
+     * @return
+     */
+    @RequestMapping("interrupt_list")
+    public ModelAndView interruptList(Integer id) {
+        LOGGER.info("interruptList, id = {}", id);
+        final ModelAndView modelAndView =  new ModelAndView("interrupt_list");
+        modelAndView.addObject("id", id);
         return modelAndView;
     }
 
