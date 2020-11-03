@@ -413,9 +413,9 @@ public class TaskController {
             sb.append(" ");
         }
         if (!Strings.isNullOrEmpty(dto.getTaskName())) {
-            sb.append(" and task_name = '");
+            sb.append(" and task_name like '%");
             sb.append(dto.getTaskName());
-            sb.append("' ");
+            sb.append("%' ");
         }
         if (!Strings.isNullOrEmpty(dto.getCreateTimeStart())) {
             sb.append("and create_time >= '");
