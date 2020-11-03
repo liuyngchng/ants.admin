@@ -75,7 +75,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">发送端IP:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="192.168.0.1">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="${origin_ip!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -83,7 +83,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">接收端传输服务IP:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="188.192.6.8">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="${target_ip!}">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -99,7 +99,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">BW重传率:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="1%">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -107,7 +107,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">BW头压缩率:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="1%">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>
@@ -115,7 +115,7 @@
             <div class="form-group backstage-form-group">
                 <label class="col-sm-2 control-label backstage-select-label">SS数据帧间压缩率:</label>
                 <div class="col-sm-10 backstage-col-sm-10">
-                    <input readonly="readonly" class="form-control backstage-input" type="text" value="1%">
+                    <input readonly="readonly" class="form-control backstage-input" type="text" value="">
                 </div>
             </div>
             <div class="hr-line-dashed backstage-hr-line-dashed"></div>

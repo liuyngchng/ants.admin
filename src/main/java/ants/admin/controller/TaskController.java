@@ -267,7 +267,6 @@ public class TaskController {
             modelAndView.addObject("date", sf.format(new Date()));
             return modelAndView;
         }
-        request.getSession().setAttribute("user.name", name);
         ModelAndView modelAndView =  new ModelAndView("login_index");
         modelAndView.addObject("name", name);
         SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
