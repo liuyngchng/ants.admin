@@ -11,7 +11,7 @@ public class User {
     public static Map<String,String> list = new HashMap<>(10);
 
     static {
-        list.put("123", "456");
+        list.put("admin", "admin");
         list.put("abc", "def");
     }
 

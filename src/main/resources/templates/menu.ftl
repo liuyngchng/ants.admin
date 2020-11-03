@@ -64,8 +64,8 @@
                             <ul class="nav nav-second-level collapse">
                                 <li>
                                     <a class="J_menuItem" href="javascript:getPage('/task_list')">任务查询</a>
-                                    <a class="J_menuItem" href="javascript:getPage('/task_detail')">任务详请</a>
-                                    <a class="J_menuItem" href="javascript:getPage('/file_list')">文件信息</a>
+<#--                                    <a class="J_menuItem" href="javascript:getPage('/task_detail')">任务详请</a>-->
+<#--                                    <a class="J_menuItem" href="javascript:getPage('/file_list')">文件信息</a>-->
                                 </li>
                             </ul>
                         <li class="line dk"></li>

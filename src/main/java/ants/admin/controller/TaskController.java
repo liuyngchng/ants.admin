@@ -5,6 +5,7 @@ import ants.admin.enums.TaskType;
 import ants.admin.model.TaskInfo;
 import ants.admin.model.Pagination;
 import ants.admin.model.TaskSearchDto;
+import ants.admin.model.User;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -240,25 +242,33 @@ public class TaskController {
     }
 
     @RequestMapping("login")
-    public ModelAndView login(HttpServletRequest request) {
-        if (null != request.getSession().getAttribute("user.name")) {
-            final String name = String.valueOf(request.getSession().getAttribute("user.name"));
-            if (Strings.isNullOrEmpty(name)) {
-                LOGGER.info("user name is null");
-                return new ModelAndView("login_index");
-            }
-            LOGGER.info("user login {}", name);
+    public ModelAndView login(HttpServletRequest request, HttpServletResponse response) {
+        if (null != request.getSession().getAttribute("user")) {
+            final User user = (User)request.getSession().getAttribute("user");
+            LOGGER.info("user login {}", user.getName());
             ModelAndView modelAndView =  new ModelAndView("index");
-            modelAndView.addObject("name", name);
+            modelAndView.addObject("name", user.getName());
             SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             modelAndView.addObject("date", sf.format(new Date()));
             return modelAndView;
         }
         final String name = request.getParameter("name");
         final String password = request.getParameter("password");
-        LOGGER.info("user login {}", name);
+        if (!Strings.isNullOrEmpty(name) && !Strings.isNullOrEmpty(password)
+                && null != User.list.get(name) && User.list.get(name).equals(password)) {
+            final User user = new User();
+            user.setName(name);
+            user.setPsword(password);
+            request.getSession().setAttribute("user", user);
+            LOGGER.info("user login success {}", name);
+            ModelAndView modelAndView =  new ModelAndView("menu");
+            modelAndView.addObject("name", user.getName());
+            SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            modelAndView.addObject("date", sf.format(new Date()));
+            return modelAndView;
+        }
         request.getSession().setAttribute("user.name", name);
-        ModelAndView modelAndView =  new ModelAndView("index");
+        ModelAndView modelAndView =  new ModelAndView("login_index");
         modelAndView.addObject("name", name);
         SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         modelAndView.addObject("date", sf.format(new Date()));
@@ -267,10 +277,10 @@ public class TaskController {
 
     @RequestMapping("logout")
     public ModelAndView logout(HttpServletRequest request) {
-        LOGGER.info("hello, file");
+        LOGGER.info("user logout");
         ModelAndView modelAndView =  new ModelAndView("login_index");
         modelAndView.addObject("data", "您已退出系统，欢迎下次再来");
-        request.getSession().removeAttribute("user.name");
+        request.getSession().removeAttribute("user");
         return modelAndView;
     }
 

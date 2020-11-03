@@ -38,7 +38,7 @@
                         <option value="5">发送失败</option>
                         <option value="6">发送成功</option>
                         <option value="7">投递成功</option>
-                        <option value="8">已删除</option>
+<#--                        <option value="8">已删除</option>-->
                     </select>
                 </div>
             </div>
