@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Controller;
@@ -242,7 +243,10 @@ public class TaskController {
     }
 
     @RequestMapping("login")
-    public ModelAndView login(HttpServletRequest request, HttpServletResponse response) {
+    public ModelAndView login(HttpServletRequest request) {
+        if(HttpMethod.GET.name().equals(request.getMethod())) {
+            return new ModelAndView("login_index");
+        }
         if (null != request.getSession().getAttribute("user")) {
             final User user = (User)request.getSession().getAttribute("user");
             LOGGER.info("user login {}", user.getName());
@@ -268,7 +272,11 @@ public class TaskController {
             return modelAndView;
         }
         ModelAndView modelAndView =  new ModelAndView("login_index");
-        modelAndView.addObject("name", name);
+        if (null == User.list.get(name)) {
+            modelAndView.addObject("info", "用户名不存在，请重新输入");
+        } else if (!User.list.get(name).equals(password)) {
+            modelAndView.addObject("info", "密码错误，请重新输入");
+        }
         SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         modelAndView.addObject("date", sf.format(new Date()));
         return modelAndView;
@@ -278,7 +286,7 @@ public class TaskController {
     public ModelAndView logout(HttpServletRequest request) {
         LOGGER.info("user logout");
         ModelAndView modelAndView =  new ModelAndView("login_index");
-        modelAndView.addObject("data", "您已退出系统，欢迎下次再来");
+        modelAndView.addObject("info", "您已退出系统，欢迎下次再来");
         request.getSession().removeAttribute("user");
         return modelAndView;
     }
@@ -332,7 +340,9 @@ public class TaskController {
                 row.put("create_time", rs.getString("create_time"));
                 row.put("finish_time", rs.getString("finish_time"));
                 int data_size = Integer.parseInt(rs.getString("data_size"));
-                if (data_size > 0  && data_size < 1024 * 1024) {
+                if (data_size > 0  && data_size < 1024) {
+                    row.put("data_size", data_size + "B");
+                } else if (data_size >= 1024 && data_size < 1024 * 1024) {
                     data_size = data_size / 1024;
                     row.put("data_size", data_size + "KB");
                 } else if (data_size >= 1024 *1024 && data_size < 1024 * 1024 * 1024) {
@@ -342,13 +352,14 @@ public class TaskController {
                     data_size = data_size / (1024 * 1024 * 1024);
                     row.put("data_size", data_size + "GB");
                 } else {
-                    row.put("data_size", data_size + "字节");
+                    row.put("data_size", data_size + "B");
                 }
                 final String taskName = rs.getString("task_name");
                 row.put("file_type", taskName.substring(taskName.lastIndexOf(".")+1));
                 row.put("complete_per", rs.getString("complete_per"));
-                row.put("status", rs.getString("status"));
-//                row.put("task_type", rs.getString("task_type"));
+                TaskStatus status = TaskStatus.getStatus(Integer.parseInt(rs.getString("status")));
+                row.put("status", status == null ? rs.getString("status"): status.getDesc());
+                row.put("task_type", "发送");
                 row.put("origin_ip", rs.getString("origin_ip"));
                 row.put("target_ip", rs.getString("target_ip"));
                 return row;

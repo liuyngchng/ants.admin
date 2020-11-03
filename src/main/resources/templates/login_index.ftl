@@ -36,14 +36,14 @@
                 </div><br>
                 <div class="input-group input-group-lg">
                     <span class="input-group-addon"> </span>
-                    <input type="submit" class="form-control" style="font-family: 'Microsoft Sans Serif'; font-size: 100%; height: 20px;" value="登&nbsp;&nbsp;录">
+                    <input type="submit" class="form-control" style="font-family: 'Microsoft Sans Serif';" value="登&nbsp;&nbsp;录">
                 </div><br>
-               <div style="font-family: 'Microsoft Sans Serif'; color: #bd362f;">${data!"<br/>"}</div>
+               <div style="font-family: 'Microsoft Sans Serif'; color: #bd362f;">${info!"<br/>"}</div>
             </form>
         </h2>
     </div>
    <div id="footer" style="text-align: center">
-       <a class="l-column-center" target="_blank" href="http://www.miitbeian.gov.cn/"> 京 ICP 备 19013129 号 </a>
+       <a class="l-column-center" target="_blank" href="http://www.miitbeian.gov.cn/" style="font-family: 'Microsoft Sans Serif';"> 京 ICP 备 1234 号 </a>
    </div>
 </body>
 </html>

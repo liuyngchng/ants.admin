@@ -34,9 +34,7 @@ public enum TaskStatus {
 
    ;
 
-
     private int status;
-
 
     private String desc;
 
@@ -50,7 +48,12 @@ public enum TaskStatus {
      * @param status
      * @return {@link TaskStatus}
      */
-    public static TaskStatus getAuditStatus(int status) {
+    public static TaskStatus getStatus(int status) {
+        for (TaskStatus s:TaskStatus.values()) {
+            if (s.getStatus() == status) {
+                return s;
+            }
+        }
 
         return null;
     }
